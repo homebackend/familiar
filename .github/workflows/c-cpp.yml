@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Familiar CI
 
 on:
   push:
@@ -6,14 +6,35 @@ on:
   pull_request:
     branches: [ "main" ]
 
+defaults:
+  run:
+    shell: bash
+
+env:
+  SOURCE_DIR:   ${{ github.workspace }}
+  QT_VERSION:   5.15.2
+  ARTIFACT:     qt-planets-linux-build.AppImage
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: configure
-      run: qmake
-    - name: make
-      run: make
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          host:         linux
+          target:       desktop
+          arch:         gcc_64
+          dir:          ${{ runner.temp }}
+          modules:      qtcharts qt3d
+          setup-python: false
+      - name: Create build directory
+        run:  mkdir ${{ env.SOURCE_DIR }}/build
+      - name: Configure Qmake
+        run: qmake
+      - name: make
+        run: make
