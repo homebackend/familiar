@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Familiar
+Comment=Genealogy Software
+Exec=Familiar
+Icon=familiar
+Terminal=false
+MultipleArgs=false
+Type=Application
+Categories=Office;Utility;
+
