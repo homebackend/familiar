@@ -1,5 +1,8 @@
 Only versions that are released to public are mentioned over here.
 
+0.99.1.1
+        * Defect fix: QT5 change for dataChanged slot.
+
 0.91.13.30
 	* Defect Fix: Fixed a defect relating to deletion of Family causing crash.
 

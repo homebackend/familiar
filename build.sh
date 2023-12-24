@@ -158,7 +158,7 @@ EOF
 	date
         qmake Familiar.pro
 	make -f Makefile buildinfo
-	make -j6 -f Makefile
+        make -j${nproc} -f Makefile
 	
 	PACKAGEDIR="package"
         PACKAGE="familiar-$VER_MAJ.$VER_MIN.$VER_PAT.$VER_BLD"

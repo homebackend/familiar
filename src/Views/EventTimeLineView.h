@@ -29,16 +29,17 @@ public:
 							 ScrollHint hint = EnsureVisible);
 	virtual QModelIndex	indexAt			(const QPoint &point) const;
 
-public slots:
-	virtual void		dataChanged		(const QModelIndex &topLeft,
-							 const QModelIndex &bottomRight);
-
 protected slots:
-	virtual void		rowsInserted		(const QModelIndex &parent,
-							 int start, int end);
-	virtual void		rowsAboutToBeRemoved	(const QModelIndex &parent,
-							 int start, int end);
-	/* This is just a private in PieView */
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    virtual void dataChanged(const QModelIndex &topLeft,
+                             const QModelIndex &bottomRight,
+                             const QVector<int> &roles = QVector<int>());
+#else
+    virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+#endif
+    virtual void rowsInserted(const QModelIndex &parent, int start, int end);
+    virtual void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
+    /* This is just a private in PieView */
 	virtual void		updateGeometries	();
 
 protected:

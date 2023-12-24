@@ -9,12 +9,18 @@
 #include <QRect>
 #include <QFontMetrics>
 
-EventTimeLineView::EventTimeLineView (QWidget *parent) :
-		QAbstractItemView(parent),
-		c_dotRadius (3), c_minYear (1900), c_maxYear (QDate::currentDate ().year ()),
-		_minYear (c_minYear), _maxYear (c_maxYear),
-		_yearUnit (10), _idealWidth (0), _idealHeight (0),
-		_bottomBarWidth (30), _hashNeedsUpdate (true)
+EventTimeLineView::EventTimeLineView(QWidget *parent)
+    : QAbstractItemView(parent)
+    , c_dotRadius(8)
+    , c_minYear(1900)
+    , c_maxYear(QDate::currentDate().year())
+    , _minYear(c_minYear)
+    , _maxYear(c_maxYear)
+    , _yearUnit(10)
+    , _idealWidth(0)
+    , _idealHeight(0)
+    , _bottomBarWidth(30)
+    , _hashNeedsUpdate(true)
 {
 	setFocusPolicy(Qt::WheelFocus);
 	setFont(QApplication::font("QListView"));
@@ -76,11 +82,22 @@ QModelIndex EventTimeLineView::indexAt (const QPoint &point) const
 	return QModelIndex();
 }
 
-void EventTimeLineView::dataChanged (const QModelIndex &topLeft, const QModelIndex &bottomRight)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+void EventTimeLineView::dataChanged(const QModelIndex &topLeft,
+                                    const QModelIndex &bottomRight,
+                                    const QVector<int> &roles)
+#else
+void EventTimeLineView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+#endif
 {
 	_hashNeedsUpdate = true;
-	QAbstractItemView::dataChanged (topLeft, bottomRight);
-	viewport ()->update ();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QAbstractItemView::dataChanged(topLeft, bottomRight, roles);
+#else
+    QAbstractItemView::dataChanged(topLeft, bottomRight);
+#endif
+
+    viewport()->update();
 }
 
 void EventTimeLineView::rowsInserted (const QModelIndex &parent, int start, int end)

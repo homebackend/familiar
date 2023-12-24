@@ -127,10 +127,20 @@ bool FamilyTreeView::getShowBasicDetailsForItem () const
 	return _showBasicDetailsForItem;
 }
 
-void FamilyTreeView::dataChanged (const QModelIndex &topLeft, const QModelIndex &bottomRight)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+void FamilyTreeView::dataChanged(const QModelIndex &topLeft,
+                                 const QModelIndex &bottomRight,
+                                 const QVector<int> &roles)
+#else
+void FamilyTreeView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+#endif
 {
 	_hashNeedsUpdate = true;
-	QAbstractItemView::dataChanged (topLeft, bottomRight);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QAbstractItemView::dataChanged(topLeft, bottomRight, roles);
+#else
+    QAbstractItemView::dataChanged(topLeft, bottomRight);
+#endif
 }
 
 void FamilyTreeView::rowsInserted (const QModelIndex &parent, int start, int end)

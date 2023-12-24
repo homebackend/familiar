@@ -124,11 +124,21 @@ QModelIndex PieView::indexAt(const QPoint &point) const
 	return QModelIndex();
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+void PieView::dataChanged(const QModelIndex &topLeft,
+                          const QModelIndex &bottomRight,
+                          const QVector<int> &roles)
+#else
 void PieView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+#endif
 {
-	QAbstractItemView::dataChanged(topLeft, bottomRight);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QAbstractItemView::dataChanged(topLeft, bottomRight, roles);
+#else
+    QAbstractItemView::dataChanged(topLeft, bottomRight);
+#endif
 
-	_validItems = 0;
+    _validItems = 0;
 	_totalValue = 0.0;
 
 	for (int row = 0; row < model()->rowCount(rootIndex()); ++row)

@@ -1,6 +1,7 @@
 #include "StatisticsPageManager.h"
 #include "Family.h"
 #include "Individual.h"
+#include "SettingsManager.h"
 
 StatisticsPageManager::StatisticsPageManager (Ui::MainWindow *_ui, QObject *parent) :
 		QObject(parent), ui (_ui),

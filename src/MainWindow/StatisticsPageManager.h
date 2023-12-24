@@ -6,7 +6,6 @@
 #include "PieView.h"
 #include "TreeModel.h"
 #include <QStandardItemModel>
-#include "SettingsManager.h"
 #include "TableModel.h"
 
 class StatisticsPageManager : public QObject
