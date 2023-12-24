@@ -1,0 +1,36 @@
+name: Familiar CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  SOURCE_DIR:   ${{ github.workspace }}
+  QT_VERSION:   5.15.2
+  ARTIFACT:     qt-planets-linux-build.AppImage
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Install Qt
+        run: >
+          sudo apt-get -y update &&
+          sudo apt-get -y upgrade &&
+          sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
+      - name: Create build directory
+        run:  mkdir ${{ env.SOURCE_DIR }}/build
+      - name: Configure Qmake
+        run: qmake
+      - name: make
+        run: make
