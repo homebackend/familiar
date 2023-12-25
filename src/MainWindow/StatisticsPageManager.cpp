@@ -292,7 +292,7 @@ void StatisticsPageManager::updatePieModel(QStandardItemModel *model,
 
 	int row = 0;
     for (QMultiMap<int, QString>::const_iterator i = countToNameMap.constEnd();
-         i - 1 != countToNameMap.constBegin();
+         i != countToNameMap.constBegin();
          i--) {
         int value = (i - 1).key();
         int percentage = qRound(value * 100.0 / totalCount);
