@@ -62,22 +62,29 @@ bool FileMenuHandler::openFile (QString fileName)
 	QFile file(fileName);
 	if (!file.open(QIODevice::ReadOnly))
 	{
-		QMessageBox::warning(dynamic_cast<QWidget*>(parent()), tr("Error reading file"), tr("Cannot read file %1:\n%2.")
-				     .arg(fileName).arg(file.errorString()));
-		return false;
-	}
-	QString err;
-	int x, y;
-	if (!doc.setContent((QIODevice *)&file, &err, &x, &y))
+        QMessageBox::warning(dynamic_cast<QWidget *>(parent()),
+                             tr("Error reading file"),
+                             tr("Cannot read file %1:\n%2.").arg(fileName).arg(file.errorString()));
+        if (SettingsManager::s_RecentFilesList.contains(fileName))
+            SettingsManager::s_RecentFilesList.removeOne(fileName);
+        updateRecentFileActions();
+        return false;
+    }
+    QString err;
+    int x, y;
+    if (!doc.setContent((QIODevice *)&file, &err, &x, &y))
 	{
 		file.close();
-		QMessageBox::warning(dynamic_cast<QWidget*>(parent()),
-				     tr("Error reading file"),
-				     tr("Invalid XML file %1.\n"
-					"It contains the following error at line %3 and column %4:\n\"%2\"")
-				     .arg(fileName).arg(err).arg(x).arg(y));
-		return false;
-	}
+        QMessageBox::warning(dynamic_cast<QWidget *>(parent()),
+                             tr("Error reading file"),
+                             tr("Invalid XML file %1.\n"
+                                "It contains the following error at line %3 and column %4:\n\"%2\"")
+                                 .arg(fileName)
+                                 .arg(err)
+                                 .arg(x)
+                                 .arg(y));
+        return false;
+    }
 	file.close();
 
 	QDomElement root = doc.documentElement();
