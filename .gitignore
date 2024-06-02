@@ -30,3 +30,14 @@
 *.exe
 *.out
 *.app
+
+# 
+
+.qmake.stash
+bin/**
+build/**
+installer/**
+package/**
+Familiar.pro.user
+Makefile
+
