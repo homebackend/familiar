@@ -1,5 +1,4 @@
 name: Qt Build and Auto-Release
-
 on:
   push:
     branches: [ "main" ]
@@ -83,11 +82,11 @@ jobs:
           VER_MAJ=${VER_MAJ:-0}
           VER_MIN=${VER_MIN:-0}
           VER_PAT=${VER_PAT:-0}
-          VER_BLD=${VER_BLD:-0} # Defaults to 0 if format is 1.2.3
+          VER_BLD=${VER_BLD:-0}
           
           # 4. Define branding constants
-          COMPANY="Homebackend"
-          DOMAIN_NAME="homebackend.com"
+          COMPANY="YourCompany"
+          DOMAIN_NAME="yourcompany.com"
           CURRENT_YEAR=$(date +%y)
           
           # 5. Ensure target subdirectories exist
@@ -95,57 +94,75 @@ jobs:
           mkdir -p rc
           
           # 6. Generate C++ versiondefs.h file in src/
-          cat << EOF > src/versiondefs.h
-#ifndef VERSIONDEFS_H
-#define VERSIONDEFS_H
-
-#define VER_MAJ        $VER_MAJ
-#define VER_MIN        $VER_MIN
-#define VER_PAT        $VER_PAT
-#define VER_BLD        $VER_BLD
-#define FAMILIARAPP    "Familiar"
-#define FAMILIARORG    "$COMPANY"
-#define FAMILIARDOMAIN "$DOMAIN_NAME"
-
-#endif // VERSIONDEFS_H
-EOF
+          # NOTE: The content lines below MUST be indented with real TAB characters
+          cat <<-'EOF' > src/versiondefs.h
+          #ifndef VERSIONDEFS_H
+          #define VERSIONDEFS_H
           
+          #define VER_MAJ        $VER_MAJ
+          #define VER_MIN        $VER_MIN
+          #define VER_PAT        $VER_PAT
+          #define VER_BLD        $VER_BLD
+          #define FAMILIARAPP    "Familiar"
+          #define FAMILIARORG    "$COMPANY"
+          #define FAMILIARDOMAIN "$DOMAIN_NAME"
+          
+          #endif // VERSIONDEFS_H
+          EOF
+          
+          # Manually replace strings inside versiondefs.h
+          sed -i "s/\$VER_MAJ/$VER_MAJ/g" src/versiondefs.h
+          sed -i "s/\$VER_MIN/$VER_MIN/g" src/versiondefs.h
+          sed -i "s/\$VER_PAT/$VER_PAT/g" src/versiondefs.h
+          sed -i "s/\$VER_BLD/$VER_BLD/g" src/versiondefs.h
+          sed -i "s/\$COMPANY/$COMPANY/g" src/versiondefs.h
+          sed -i "s/\$DOMAIN_NAME/$DOMAIN_NAME/g" src/versiondefs.h
+
           # 7. Generate Windows resource appinfo.rc file in rc/
-          cat << EOF > rc/appinfo.rc
-# if defined(UNDER_CE)
-#  include "winbase.h"
-# else
-#  include "winver.h"
-# endif
-VS_VERSION_INFO VERSIONINFO
-    FILEVERSION $VER_MAJ,$VER_MIN,$VER_PAT,$VER_BLD
-    PRODUCTVERSION $VER_MAJ,$VER_MIN,$VER_PAT,$VER_BLD
-    FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
-    FILEFLAGS VS_FF_DEBUG
-#else
-    FILEFLAGS 0x0L
-#endif
-    FILEOS VOS__WINDOWS32
-    FILETYPE VFT_DLL
-    FILESUBTYPE 0x0L
-    BEGIN
-        BLOCK "StringFileInfo"
-        BEGIN
-            BLOCK "040904B0"
+          # NOTE: The content lines below MUST be indented with real TAB characters
+          cat <<-'EOF' > rc/appinfo.rc
+          #if defined(UNDER_CE)
+          # include "winbase.h"
+          #else
+          # include "winver.h"
+          #endif
+          VS_VERSION_INFO VERSIONINFO
+            FILEVERSION VER_MAJ,VER_MIN,VER_PAT,VER_BLD
+            PRODUCTVERSION VER_MAJ,VER_MIN,VER_PAT,VER_BLD
+            FILEFLAGSMASK 0x3fL
+          #ifdef _DEBUG
+            FILEFLAGS VS_FF_DEBUG
+          #else
+            FILEFLAGS 0x0L
+          #endif
+            FILEOS VOS__WINDOWS32
+            FILETYPE VFT_DLL
+            FILESUBTYPE 0x0L
             BEGIN
-                VALUE "CompanyName", "$COMPANY\\\\0"
-                VALUE "FileDescription", "Familiar Executable\\\\0"
-                VALUE "FileVersion", "$VER_MAJ.$VER_MIN.$VER_PAT.$VER_BLD\\\\0"
-                VALUE "LegalCopyright", "Copyright (c) Neeraj Jakhar 2009-20$CURRENT_YEAR.\\\\0"
-                VALUE "OriginalFilename", "Familiar.exe\\\\0"
-                VALUE "ProductName", "Familiar\\\\0"
+              BLOCK "StringFileInfo"
+              BEGIN
+                BLOCK "040904B0"
+                BEGIN
+                  VALUE "CompanyName", "COMPANY\\0"
+                  VALUE "FileDescription", "Familiar Executable\\0"
+                  VALUE "FileVersion", "VER_MAJ.VER_MIN.VER_PAT.VER_BLD\\0"
+                  VALUE "LegalCopyright", "Copyright (c) Neeraj Jakhar 2009-20CURRENT_YEAR.\\0"
+                  VALUE "OriginalFilename", "Familiar.exe\\0"
+                  VALUE "ProductName", "Familiar\\0"
+                END
+              END
             END
-        END
-    END
-/* End of Version info */
-IDI_ICON1               ICON    DISCARDABLE     "familiar.ico"
-EOF
+          /* End of Version info */
+          IDI_ICON1               ICON    DISCARDABLE     "familiar.ico"
+          EOF
+
+          # Manually replace strings inside appinfo.rc
+          sed -i "s/VER_MAJ/$VER_MAJ/g" rc/appinfo.rc
+          sed -i "s/VER_MIN/$VER_MIN/g" rc/appinfo.rc
+          sed -i "s/VER_PAT/$VER_PAT/g" rc/appinfo.rc
+          sed -i "s/VER_BLD/$VER_BLD/g" rc/appinfo.rc
+          sed -i "s/COMPANY/$COMPANY/g" rc/appinfo.rc
+          sed -i "s/CURRENT_YEAR/$CURRENT_YEAR/g" rc/appinfo.rc
           
           echo "Generated version metadata. Components parsed: Major=$VER_MAJ, Minor=$VER_MIN, Patch=$VER_PAT, Build=$VER_BLD"
 
