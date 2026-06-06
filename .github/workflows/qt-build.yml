@@ -3,7 +3,7 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'VERSION'
+      - 'VERSION.txt'
   workflow_dispatch:
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
       - name: Read Version File
         id: get-ver
         run: |
-          VER=$(cat VERSION | tr -d '[:space:]')
+          VER=$(cat VERSION.txt | tr -d '[:space:]')
           echo "version=$VER" >> $GITHUB_OUTPUT
 
       - name: Compare with Existing Git Tags
@@ -56,13 +56,13 @@ jobs:
         include:
           - os: ubuntu-latest
             qt-arch: linux_gcc_64
-            binary-name: familiar
+            binary-name: Familiar
           - os: windows-latest
             qt-arch: win64_msvc2022_64
-            binary-name: familiar.exe
+            binary-name: Familiar.exe
           - os: macos-latest
             qt-arch: clang_64
-            binary-name: familiar
+            binary-name: Familiar
 
     steps:
       - name: Checkout Source Code
