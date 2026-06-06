@@ -4,6 +4,8 @@ on:
     branches: [ "main" ]
     paths:
       - 'VERSION.txt'
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
