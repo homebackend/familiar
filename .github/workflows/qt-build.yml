@@ -182,6 +182,11 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: nmake
 
+      - name: Deploy Qt Dependencies (Windows Only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          windeployqt --no-compiler-runtime --verbose 1 bin\windows\Familiar.exe
+
       - name: Rename Binary for Release
         run: |
           mkdir -p out_assets
@@ -193,20 +198,42 @@ jobs:
         if: matrix.is-linux == true
         shell: bash
         run: |
+          # 1. Create a standard Arch Linux hierarchy layout (pkg directory)
           mkdir -p pkg/usr/bin
           mkdir -p pkg/usr/share/applications
           mkdir -p pkg/usr/share/pixmaps
           
+          # 2. Safely copy your binary, desktop entry, and main UI icon assets
           cp "${{ matrix.binary-path }}" pkg/usr/bin/Familiar
           cp desktop/familiar.desktop pkg/usr/share/applications/Familiar.desktop
           cp src/MainWindow/images/familiar.png pkg/usr/share/pixmaps/Familiar.png
           
+          # 3. Create the mandatory .PKGINFO metadata file for pacman [1]
+          # We extract the version string directly from the check-version job output
+          APP_VER="${{ needs.check-version.outputs.app_version }}"
+          
+          cat <<-EOF > pkg/.PKGINFO
+          pkgname = familiar
+          pkgver = $APP_VER
+          pkgrel = 1
+          pkgdesc = Familiar Application
+          url = https://yourcompany.com
+          arch = x86_64
+          license = GPL
+          depend = qt6-base
+          depend = libxkbcommon-x11
+          EOF
+
+          # 4. Compile asset definitions into an installable Arch Linux .tar.zst package
+          # Note: The files must be zipped in a precise order where .PKGINFO is near the front [1]
           cd pkg
-          tar -I 'zstd -19 -T0' -cf ../Familiar-ArchLinux.pkg.tar.zst .
+          tar --no-pad -I 'zstd -19 -T0' -cf ../familiar-$APP_VER-1-x86_64.pkg.tar.zst .PKGINFO usr/
           cd ..
           
+          # 5. Copy the completed release archive straight to your distribution directory
           mkdir -p out_assets
-          cp Familiar-ArchLinux.pkg.tar.zst out_assets/
+          cp familiar-$APP_VER-1-x86_64.pkg.tar.zst out_assets/
+
 
       # --- WINDOWS NSIS INSTALLER BLOCK ---
       - name: Install NSIS Compiler (Windows Only)
