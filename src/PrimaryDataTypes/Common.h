@@ -62,6 +62,17 @@
 	return true;
 #define	SETFUNCTIONWITHCONSTCAST(class,function,type,argument)	SETFUNCTIONSIGNATURE(class,function,type,argument) { SETFUNCTIONBODYWITHCONSTCAST(class,type,argument) }
 
+#include <QtGlobal>
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QRegularExpression>
+// Alias QRegExp to QRegularExpression for Qt 6+
+using QRegExp = QRegularExpression;
+#else
+// Keep the original Qt 5 class
+#include <QRegExp>
+#endif
+
 #include <QTextStream>
 #include <QDebug>
 #include <QtXml/QDomElement>
