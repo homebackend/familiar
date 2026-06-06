@@ -1,0 +1,192 @@
+name: Qt Build and Auto-Release
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'VERSION'
+  workflow_dispatch:
+
+jobs:
+  check-version:
+    name: Check for Version Changes
+    runs-on: ubuntu-latest
+    outputs:
+      version_changed: ${{ steps.compare.outputs.changed }}
+      app_version: ${{ steps.get-ver.outputs.version }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read Version File
+        id: get-ver
+        run: |
+          VER=$(cat VERSION | tr -d '[:space:]')
+          echo "version=$VER" >> $GITHUB_OUTPUT
+
+      - name: Compare with Existing Git Tags
+        id: compare
+        run: |
+          VER=${{ steps.get-ver.outputs.version }}
+          if git rev-parse "v$VER" >/dev/null 2>&1; then
+            echo "Version v$VER already has a release tag."
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              echo "Manual trigger: forcing build pipeline."
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "Skipping release creation."
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "New version v$VER detected! Initiating build and release pipeline."
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-release:
+    name: Compile and Release
+    needs: check-version
+    if: needs.check-version.outputs.version_changed == 'true'
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            qt-arch: gcc_64
+            binary-name: familiar
+          - os: windows-latest
+            qt-arch: win64_msvc2022_64
+            binary-name: familiar.exe
+          - os: macos-latest
+            qt-arch: clang_64
+            binary-name: familiar
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # Parses the version string with conditional build version fallbacks
+      - name: Generate Version Artifacts
+        shell: bash
+        run: |
+          # 1. Read full version string
+          FULL_VER="${{ needs.check-version.outputs.app_version }}"
+          
+          # 2. Parse components dynamically
+          IFS='.' read -r VER_MAJ VER_MIN VER_PAT VER_BLD <<< "$FULL_VER"
+          
+          # 3. Apply defensive fallbacks and handle 3-part vs 4-part structure
+          VER_MAJ=${VER_MAJ:-0}
+          VER_MIN=${VER_MIN:-0}
+          VER_PAT=${VER_PAT:-0}
+          VER_BLD=${VER_BLD:-0} # Defaults to 0 if format is 1.2.3
+          
+          # 4. Define branding constants
+          COMPANY="Homebackend"
+          DOMAIN_NAME="homebackend.com"
+          CURRENT_YEAR=$(date +%y)
+          
+          # 5. Ensure target subdirectories exist
+          mkdir -p src
+          mkdir -p rc
+          
+          # 6. Generate C++ versiondefs.h file in src/
+          cat << EOF > src/versiondefs.h
+#ifndef VERSIONDEFS_H
+#define VERSIONDEFS_H
+
+#define VER_MAJ        $VER_MAJ
+#define VER_MIN        $VER_MIN
+#define VER_PAT        $VER_PAT
+#define VER_BLD        $VER_BLD
+#define FAMILIARAPP    "Familiar"
+#define FAMILIARORG    "$COMPANY"
+#define FAMILIARDOMAIN "$DOMAIN_NAME"
+
+#endif // VERSIONDEFS_H
+EOF
+          
+          # 7. Generate Windows resource appinfo.rc file in rc/
+          cat << EOF > rc/appinfo.rc
+# if defined(UNDER_CE)
+#  include "winbase.h"
+# else
+#  include "winver.h"
+# endif
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION $VER_MAJ,$VER_MIN,$VER_PAT,$VER_BLD
+    PRODUCTVERSION $VER_MAJ,$VER_MIN,$VER_PAT,$VER_BLD
+    FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+    FILEFLAGS VS_FF_DEBUG
+#else
+    FILEFLAGS 0x0L
+#endif
+    FILEOS VOS__WINDOWS32
+    FILETYPE VFT_DLL
+    FILESUBTYPE 0x0L
+    BEGIN
+        BLOCK "StringFileInfo"
+        BEGIN
+            BLOCK "040904B0"
+            BEGIN
+                VALUE "CompanyName", "$COMPANY\\\\0"
+                VALUE "FileDescription", "Familiar Executable\\\\0"
+                VALUE "FileVersion", "$VER_MAJ.$VER_MIN.$VER_PAT.$VER_BLD\\\\0"
+                VALUE "LegalCopyright", "Copyright (c) Neeraj Jakhar 2009-20$CURRENT_YEAR.\\\\0"
+                VALUE "OriginalFilename", "Familiar.exe\\\\0"
+                VALUE "ProductName", "Familiar\\\\0"
+            END
+        END
+    END
+/* End of Version info */
+IDI_ICON1               ICON    DISCARDABLE     "familiar.ico"
+EOF
+          
+          echo "Generated version metadata. Components parsed: Major=$VER_MAJ, Minor=$VER_MIN, Patch=$VER_PAT, Build=$VER_BLD"
+
+      - name: Install Qt Environment
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          arch: ${{ matrix.qt-arch }}
+
+      - name: Install Linux Build Dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libgl1-mesa-dev libxkbcommon-x11-0
+
+      - name: Setup MSVC (Windows Only)
+        if: matrix.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Run qmake Configuration
+        run: qmake familiar.pro CONFIG+=release
+
+      - name: Build Application (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+
+      - name: Build Application (Windows)
+        if: matrix.os == 'windows-latest'
+        run: nmake
+
+      - name: Rename Binary for Release
+        run: |
+          mkdir out_assets
+          cp ${{ matrix.binary-name }} out_assets/${{ matrix.binary-name }}-${{ matrix.os }}
+        shell: bash
+
+      - name: Publish GitHub Release and Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.check-version.outputs.app_version }}
+          name: Release v${{ needs.check-version.outputs.app_version }}
+          generate_release_notes: true
+          files: out_assets/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
