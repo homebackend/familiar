@@ -56,12 +56,15 @@ jobs:
         include:
           - os: ubuntu-latest
             qt-arch: linux_gcc_64
+            binary-path: bin/unix/Familiar
             binary-name: Familiar
           - os: windows-latest
             qt-arch: win64_msvc2022_64
+            binary-path: bin\windows\Familiar.exe
             binary-name: Familiar.exe
           - os: macos-latest
             qt-arch: clang_64
+            binary-path: bin/unix/Familiar.app/Contents/MacOS/Familiar
             binary-name: Familiar
 
     steps:
@@ -179,8 +182,8 @@ jobs:
 
       - name: Rename Binary for Release
         run: |
-          mkdir out_assets
-          cp ${{ matrix.binary-name }} out_assets/${{ matrix.binary-name }}-${{ matrix.os }}
+          mkdir -p out_assets
+          cp "${{ matrix.binary-path }}" "out_assets/${{ matrix.binary-name }}-${{ matrix.os }}"
         shell: bash
 
       - name: Publish GitHub Release and Assets
