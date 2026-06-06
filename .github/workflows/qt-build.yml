@@ -1,4 +1,5 @@
 name: Qt Build and Auto-Release
+
 on:
   push:
     branches: [ "main" ]
