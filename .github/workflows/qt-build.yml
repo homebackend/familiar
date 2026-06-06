@@ -172,7 +172,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Run qmake Configuration
-        run: qmake Familiar.pro CONFIG+=release
+        run: qmake Familiar.pro CONFIG+=release CONFIG-=debug
 
       - name: Build Application (Linux/macOS)
         if: matrix.os != 'windows-latest'
