@@ -208,12 +208,16 @@ jobs:
           
           APP_VER="${{ needs.check-version.outputs.app_version }}"
           
+          PKG_SIZE=$(du -sb pkg/usr | cut -f1)
+          
           cat <<-EOF > pkg/.PKGINFO
           pkgname = familiar
-          pkgver = $APP_VER
-          pkgrel = 1
+          pkgver = $APP_VER-1
           pkgdesc = Familiar is a genealogy software
           url = https://homebackend.com
+          builddate = $(date +%s)
+          packager = GitHub Actions CI
+          size = $PKG_SIZE
           arch = x86_64
           license = GPL
           depend = qt6-base
@@ -226,7 +230,6 @@ jobs:
           
           mkdir -p out_assets
           cp familiar-$APP_VER-1-x86_64.pkg.tar.zst out_assets/
-
 
       # --- WINDOWS NSIS INSTALLER BLOCK ---
       - name: Install NSIS Compiler (Windows Only)
