@@ -95,7 +95,7 @@ jobs:
           
           # 6. Generate C++ versiondefs.h file in src/
           # NOTE: The content lines below MUST be indented with real TAB characters
-          cat <<-'EOF' > src/versiondefs.h
+          cat <<-EOF > src/versiondefs.h
           #ifndef VERSIONDEFS_H
           #define VERSIONDEFS_H
           
@@ -112,7 +112,7 @@ jobs:
           
           # 7. Generate Windows resource appinfo.rc file in rc/
           # NOTE: The content lines below MUST be indented with real TAB characters
-          cat <<-'EOF' > rc/appinfo.rc
+          cat <<-EOF > rc/appinfo.rc
           #if defined(UNDER_CE)
           # include "winbase.h"
           #else
