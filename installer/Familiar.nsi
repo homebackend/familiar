@@ -48,15 +48,9 @@ Section "Familiar"
   
   ; Put file there
   File "..\bin\windows\Familiar.exe"
-  File /r "..\bin\windows\*.dll"
-  File /r "..\examples"
-
-  ; Copy the mandatory platform directories
-  SetOutPath "$INSTDIR\platforms"
-  File "bin\windows\platforms\qwindows.dll"
-  
-  SetOutPath "$INSTDIR\styles"
-  File "bin\windows\styles\qwindowsvistastyle.dll"
+  File "..\bin\windows\Qt6*.dll"
+  File /r "..\bin\windows\platforms"
+  File /r "..\bin\windows\styles"
   
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\Familiar "Install_Dir" "$INSTDIR"
