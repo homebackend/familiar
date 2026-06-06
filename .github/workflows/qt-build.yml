@@ -55,7 +55,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            qt-arch: gcc_64
+            qt-arch: linux_gcc_64
             binary-name: familiar
           - os: windows-latest
             qt-arch: win64_msvc2022_64
@@ -85,8 +85,8 @@ jobs:
           VER_BLD=${VER_BLD:-0}
           
           # 4. Define branding constants
-          COMPANY="YourCompany"
-          DOMAIN_NAME="yourcompany.com"
+          COMPANY="HomeBackend"
+          DOMAIN_NAME="homebackend.com"
           CURRENT_YEAR=$(date +%y)
           
           # 5. Ensure target subdirectories exist
@@ -110,14 +110,6 @@ jobs:
           #endif // VERSIONDEFS_H
           EOF
           
-          # Manually replace strings inside versiondefs.h
-          sed -i "s/\$VER_MAJ/$VER_MAJ/g" src/versiondefs.h
-          sed -i "s/\$VER_MIN/$VER_MIN/g" src/versiondefs.h
-          sed -i "s/\$VER_PAT/$VER_PAT/g" src/versiondefs.h
-          sed -i "s/\$VER_BLD/$VER_BLD/g" src/versiondefs.h
-          sed -i "s/\$COMPANY/$COMPANY/g" src/versiondefs.h
-          sed -i "s/\$DOMAIN_NAME/$DOMAIN_NAME/g" src/versiondefs.h
-
           # 7. Generate Windows resource appinfo.rc file in rc/
           # NOTE: The content lines below MUST be indented with real TAB characters
           cat <<-'EOF' > rc/appinfo.rc
@@ -127,8 +119,8 @@ jobs:
           # include "winver.h"
           #endif
           VS_VERSION_INFO VERSIONINFO
-            FILEVERSION VER_MAJ,VER_MIN,VER_PAT,VER_BLD
-            PRODUCTVERSION VER_MAJ,VER_MIN,VER_PAT,VER_BLD
+            FILEVERSION $VER_MAJ,$VER_MIN,$VER_PAT,$VER_BLD
+            PRODUCTVERSION $VER_MAJ,$VER_MIN,$VER_PAT,$VER_BLD
             FILEFLAGSMASK 0x3fL
           #ifdef _DEBUG
             FILEFLAGS VS_FF_DEBUG
@@ -143,10 +135,10 @@ jobs:
               BEGIN
                 BLOCK "040904B0"
                 BEGIN
-                  VALUE "CompanyName", "COMPANY\\0"
+                  VALUE "CompanyName", "$COMPANY\\0"
                   VALUE "FileDescription", "Familiar Executable\\0"
-                  VALUE "FileVersion", "VER_MAJ.VER_MIN.VER_PAT.VER_BLD\\0"
-                  VALUE "LegalCopyright", "Copyright (c) Neeraj Jakhar 2009-20CURRENT_YEAR.\\0"
+                  VALUE "FileVersion", "$VER_MAJ.$VER_MIN.$VER_PAT.$VER_BLD\\0"
+                  VALUE "LegalCopyright", "Copyright (c) Neeraj Jakhar 2009-20$CURRENT_YEAR.\\0"
                   VALUE "OriginalFilename", "Familiar.exe\\0"
                   VALUE "ProductName", "Familiar\\0"
                 END
@@ -155,14 +147,6 @@ jobs:
           /* End of Version info */
           IDI_ICON1               ICON    DISCARDABLE     "familiar.ico"
           EOF
-
-          # Manually replace strings inside appinfo.rc
-          sed -i "s/VER_MAJ/$VER_MAJ/g" rc/appinfo.rc
-          sed -i "s/VER_MIN/$VER_MIN/g" rc/appinfo.rc
-          sed -i "s/VER_PAT/$VER_PAT/g" rc/appinfo.rc
-          sed -i "s/VER_BLD/$VER_BLD/g" rc/appinfo.rc
-          sed -i "s/COMPANY/$COMPANY/g" rc/appinfo.rc
-          sed -i "s/CURRENT_YEAR/$CURRENT_YEAR/g" rc/appinfo.rc
           
           echo "Generated version metadata. Components parsed: Major=$VER_MAJ, Minor=$VER_MIN, Patch=$VER_PAT, Build=$VER_BLD"
 
