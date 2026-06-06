@@ -126,7 +126,7 @@ void TableModel::sort (int column, Qt::SortOrder order)
 	if (order == Qt::AscendingOrder)
 	{
 		_individualItemsSortedList.clear ();
-		for (QMap <QString, TreeItem*>::const_iterator i = mapOfColumnToTreeItem.constBegin ();
+        for (auto i = mapOfColumnToTreeItem.constBegin ();
 		     i != mapOfColumnToTreeItem.constEnd (); i++)
 			_individualItemsSortedList << i.value ();
 	}
@@ -134,7 +134,7 @@ void TableModel::sort (int column, Qt::SortOrder order)
 	if (order == Qt::DescendingOrder)
 	{
 		_individualItemsSortedList.clear ();
-		for (QMap <QString, TreeItem*>::const_iterator i = mapOfColumnToTreeItem.constEnd ();
+        for (auto i = mapOfColumnToTreeItem.constEnd ();
 		     i != mapOfColumnToTreeItem.constBegin (); --i)
 			_individualItemsSortedList << i.value ();
 	}

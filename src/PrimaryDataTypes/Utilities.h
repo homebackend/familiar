@@ -3,6 +3,9 @@
 
 #include <QString>
 #include <QFontMetrics>
+#include <QRect>
+#include <QWidget>
+#include <QStyleOptionViewItem>
 
 class Individual;
 class Familiar;
@@ -21,6 +24,10 @@ public:
 							 Individual *individual = NULL);
 
     static int          horizontalAdvance(QFontMetrics &fmx, const QString &input);
+
+    static QRect        getScreenGeometry(QWidget* parentWidget);
+
+    static bool         safeCanConvert(const QVariant &variant, int targetTypeId);
 
 private:
 	static void			convertFTMLToDisplayFormatHelperFunction

@@ -52,8 +52,13 @@ QString TextEditWithAutoComplete::toHtml () const
 	anchorTypes << "iid" << "fid";
 	foreach (QString anchorType, anchorTypes)
 	{
-		QRegExp regExp ("<a href=\"" + anchorType + ":([0-9]+)\".*</a>");
-		regExp.setMinimal (true);
+        QRegExp regExp ("<a href=\"" + anchorType + ":([0-9]+)\".*</a>"
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                       , QRegularExpression::InvertedGreedinessOption);
+#else
+                       );
+        regExp.setMinimal (true);
+#endif
 		ret.replace (regExp, "[[" + anchorType + "=\\1]]");
 	}
 

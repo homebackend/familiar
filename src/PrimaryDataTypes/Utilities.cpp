@@ -2,6 +2,19 @@
 #include "Individual.h"
 #include "Family.h"
 
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+#include <QGuiApplication>
+#include <QScreen>
+#include <QWindow>
+#else
+#include <QApplication>
+#include <QDesktopWidget>
+#endif
+#include <QVariant>
+#include <QMetaType>
+#include <QAbstractItemView>
+
 Utilities::Utilities()
 {
 }
@@ -193,5 +206,28 @@ int Utilities::horizontalAdvance(QFontMetrics &fmx, const QString &input)
     return fmx.horizontalAdvance(input);
 #else
     return fmx.width (strData);
+#endif
+}
+
+QRect Utilities::getScreenGeometry(QWidget* parentWidget) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
+    if (parentWidget && parentWidget->windowHandle()) {
+        QScreen *screen = parentWidget->windowHandle()->screen();
+        if (screen) return screen->geometry();
+    }
+    return QGuiApplication::primaryScreen()->geometry();
+#else
+    if (parentWidget) return QApplication::desktop()->screenGeometry(parentWidget);
+    return QApplication::desktop()->screenGeometry();
+#endif
+}
+
+bool Utilities::safeCanConvert(const QVariant &variant, int targetTypeId) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    // Qt 6 requires a QMetaType object wrapper
+    return variant.canConvert(QMetaType(targetTypeId));
+#else
+    // Qt 5 (all versions) accepts the raw integer ID directly
+    return variant.canConvert(targetTypeId);
 #endif
 }

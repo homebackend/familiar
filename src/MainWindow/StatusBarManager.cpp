@@ -178,9 +178,7 @@ void StatusBarManager::updateTodayEventInStatusBar ()
 	{
 		QDate today = QDate::currentDate ();
 		todayEventText = QString ("No events for %1<sup>%2</sup> %3.")
-				.arg (today.toString ("d"))
-				.arg (Dated::getDayth (today.day ()))
-				.arg (today.toString ("MMMM"));
+                .arg (today.toString ("d"), Dated::getDayth (today.day ()), today.toString ("MMMM"));
 	}
 
 	_todaysEventLabel->setMovingText ("=> " + todayEventText);
@@ -201,8 +199,13 @@ void StatusBarManager::updateTodayEventInStatusBar ()
 			convertedTodayEventText = todayEventText;
 			systemTrayToolTip += convertedTodayEventText;
 		}
-		QRegExp htmlTagMatcher ("<.*>");
-		htmlTagMatcher.setMinimal (true);
+        QRegExp htmlTagMatcher ("<.*>"
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                               , QRegularExpression::InvertedGreedinessOption);
+#else
+                               );
+        htmlTagMatcher.setMinimal (true);
+#endif
 
 		convertedTodayEventText.replace (htmlTagMatcher, "");
 

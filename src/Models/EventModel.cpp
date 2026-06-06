@@ -1,4 +1,5 @@
 #include "EventModel.h"
+#include "Utilities.h"
 #include <QPixmap>
 #include <QTimer>
 
@@ -299,7 +300,7 @@ bool EventModel::setData(const QModelIndex &index, const QVariant &value, int ro
 		case colPlace: throw _indexToEventMap.value(row)->setPlace(value.toString());
 		case colDescription: throw _indexToEventMap.value(row)->setDescription(value.toString());
 		case colIsMember:
-            if (value.canConvert(QMetaType::Bool))
+            if (Utilities::safeCanConvert(value, QMetaType::Bool))
 			{
 				if (value.toBool())
 					throw _indexToEventMap.value(row)->appendChild(_individual);
