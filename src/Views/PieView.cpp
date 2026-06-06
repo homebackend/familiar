@@ -103,7 +103,14 @@ QModelIndex PieView::indexAt(const QPoint &point) const
 	}
 	else
 	{
-		double itemHeight = QFontMetrics(viewOptions().font).height();
+        QStyleOptionViewItem options;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        initViewItemOption(&options);
+#else
+        options = viewOptions();
+#endif
+
+        double itemHeight = QFontMetrics(options.font).height();
 		int listItem = int((wy - _margin) / itemHeight) - 1;
 		int validRow = 0;
 
@@ -318,7 +325,12 @@ void PieView::mouseReleaseEvent(QMouseEvent *event)
 void PieView::paintEvent(QPaintEvent *event)
 {
 	QItemSelectionModel *selections = selectionModel();
-	QStyleOptionViewItem option = viewOptions();
+    QStyleOptionViewItem option;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    initViewItemOption(&option);
+#else
+    option = viewOptions();
+#endif
 //	QStyle::State state = option.state;
 
 	QBrush background = option.palette.base();
@@ -374,7 +386,14 @@ void PieView::paintEvent(QPaintEvent *event)
 		}
 		painter.restore();
 
-		qreal itemHeight = QFontMetrics(viewOptions().font).height();
+        QStyleOptionViewItem options;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        initViewItemOption(&options);
+#else
+        options = viewOptions();
+#endif
+
+        qreal itemHeight = QFontMetrics(options.font).height();
 		QRect titleRect (_totalSize, int(_margin), _totalSize - _margin, int(itemHeight));
 		painter.drawText (titleRect, model ()->headerData (0, Qt::Horizontal,
 								   Qt::DisplayRole).toString ());
@@ -382,7 +401,12 @@ void PieView::paintEvent(QPaintEvent *event)
 		{
 			QModelIndex labelIndex = model()->index(row, 0, rootIndex());
 
-			QStyleOptionViewItem option = viewOptions();
+            QStyleOptionViewItem option;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            initViewItemOption(&option);
+#else
+            option = viewOptions();
+#endif
 			option.rect = visualRect(labelIndex);
 			if (selections->isSelected(labelIndex))
 				option.state |= QStyle::State_Selected;
@@ -447,11 +471,20 @@ QRect PieView::itemRect(const QModelIndex &index) const
 	switch (index.column())
 	{
 		case 0:
-			itemHeight = QFontMetrics(viewOptions().font).height();
+        {
+            QStyleOptionViewItem options;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            initViewItemOption(&options);
+#else
+            options = viewOptions();
+#endif
+
+            itemHeight = QFontMetrics(options.font).height();
 
 			return QRect(_totalSize,
 				     int(_margin + (listItem + 1)*itemHeight),
 				     _totalSize - _margin, int(itemHeight));
+        }
 		case 1:
 			return viewport()->rect();
 	}

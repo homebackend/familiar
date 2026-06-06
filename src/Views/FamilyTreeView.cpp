@@ -866,8 +866,13 @@ void FamilyTreeView::paintIndex (QModelIndex index, QPainter &painter)
 	QRectF rect = viewportRectForIndex (index);
 	if (rect.isValid () && viewport ()->rect ().intersects (rect.toRect ()))
 	{
-		QStyleOptionViewItem option = viewOptions();
-		option.rect = rect.toRect ();
+        QStyleOptionViewItem option;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        initViewItemOption(&option);
+#else
+        option = viewOptions();
+#endif
+        option.rect = rect.toRect ();
 		if (selectionModel()->isSelected(index))
 			option.state |= QStyle::State_Selected;
 		if (currentIndex() == index)

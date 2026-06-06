@@ -2,10 +2,9 @@
 #include "TreeItem.h"
 #include <QToolTip>
 #include <QProcess>
-#include <QDesktopWidget>
-#include <QApplication>
 #include "SettingsManager.h"
 #include <QMessageBox>
+#include "Utilities.h"
 
 ItemViewManager::ItemViewManager(Ui::MainWindow *_ui, QObject *parent)
 	: QObject(parent), ui(_ui),
@@ -109,8 +108,8 @@ void ItemViewManager::handleAnchorClick (const QUrl &url) const
 
 		Individual *individual = Individual::s_IdToIndividualHash.value(id);
 
-		QDesktopWidget *desktopWidget = QApplication::desktop();
-		QRect windowRect = desktopWidget->screenGeometry(dynamic_cast<QWidget*>(parent()));
+        QWidget* parentWidget = dynamic_cast<QWidget*>(parent());
+        QRect windowRect = Utilities::getScreenGeometry(parentWidget);
 		QPixmap *pixmap = individual->getImage();
 		int imageHeight = pixmap->height();
 		int imageWidth = pixmap->width();

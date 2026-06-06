@@ -48,8 +48,9 @@ Section "Familiar"
   
   ; Put file there
   File "..\bin\windows\Familiar.exe"
-  File /r "..\qt\windows\*.*"
-  File /r "..\examples"
+  File "..\bin\windows\Qt6*.dll"
+  File /r "..\bin\windows\platforms"
+  File /r "..\bin\windows\styles"
   
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\Familiar "Install_Dir" "$INSTDIR"

@@ -438,8 +438,14 @@ void EditMenuHandler::fullTextSearch (const bool &searching) const
 		return;
 	}
 
-	QRegExp searchRegExp (searchString);
-	searchRegExp.setCaseSensitivity (Qt::CaseInsensitive);
+    QRegExp searchRegExp (searchString
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                       , QRegularExpression::InvertedGreedinessOption);
+#else
+                       );
+        searchRegExp.setMinimal (true);
+#endif
+
 	ui->textBrowserSearchResults->clear ();
 
 	for (int i = 0; i < Family::s_FamilyList.size (); i++)
@@ -455,7 +461,13 @@ void EditMenuHandler::fullTextSearch (const bool &searching) const
 						 .arg (family->getAnchor (0, true, true)));
 		ui->textBrowserSearchResults->append (
 					displayResults.join (htmlNewLine).replace (
-						QRegExp (QString ("(%1)").arg (searchString), Qt::CaseInsensitive),
+                        QRegExp (QString ("(%1)").arg (searchString),
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                                 QRegularExpression::CaseInsensitiveOption
+#else
+                                 Qt::CaseInsensitive
+#endif
+                        ),
 						"<span style=\"background-color: yellow;\">\\1</span>"));
 		ui->textBrowserSearchResults->append ("<hr>");
 	}
@@ -488,7 +500,13 @@ void EditMenuHandler::fullTextSearch (const bool &searching) const
 						 .arg (individual->getAnchor (0, true, true)));
 		ui->textBrowserSearchResults->append (
 					displayResults.join (htmlNewLine).replace (
-						QRegExp (QString ("(%1)").arg (searchString), Qt::CaseInsensitive),
+                        QRegExp (QString ("(%1)").arg (searchString),
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                                 QRegularExpression::CaseInsensitiveOption
+#else
+                                 Qt::CaseInsensitive
+#endif
+                        ),
 						"<span style=\"background-color: yellow;\">\\1</span>"));
 		ui->textBrowserSearchResults->append ("<hr>");
 	}

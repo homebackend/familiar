@@ -1,11 +1,11 @@
 #include "TreeModel.h"
 #include "TreeItem.h"
-#include "MaleIndividual.h"
-#include "FemaleIndividual.h"
+#include "qpicture.h"
 
 #include <QMapIterator>
 #include <QMenu>
 #include <QTimer>
+#include <QIODevice>
 
 const QString TreeModel::s_mimetype = "application/x-Familiar.text.xml";
 
